@@ -13,8 +13,13 @@ use elliptic_curve::{
 };
 use signature::{
     digest::{BlockInput, Digest, FixedOutput, Reset, Update},
+    DigestSigner,
+};
+
+#[cfg(feature = "rand")]
+use signature::{
     rand_core::{CryptoRng, RngCore},
-    DigestSigner, RandomizedDigestSigner, RandomizedSigner,
+    RandomizedDigestSigner, RandomizedSigner,
 };
 
 #[cfg(feature = "verify")]
@@ -55,6 +60,7 @@ where
     Scalar<C>: FromDigest<C> + Invert<Output = Scalar<C>> + SignPrimitive<C> + Zeroize,
     SignatureSize<C>: ArrayLength<u8>,
 {
+    #[cfg(feature = "rand")]
     /// Generate a cryptographically random [`SigningKey`].
     pub fn random(rng: impl CryptoRng + RngCore) -> Self {
         Self {
@@ -139,6 +145,7 @@ where
     }
 }
 
+#[cfg(feature = "rand")]
 impl<C, D> RandomizedDigestSigner<D, Signature<C>> for SigningKey<C>
 where
     C: Curve + ProjectiveArithmetic,
@@ -163,6 +170,7 @@ where
     }
 }
 
+#[cfg(feature = "rand")]
 impl<C> RandomizedSigner<Signature<C>> for SigningKey<C>
 where
     Self: RandomizedDigestSigner<C::Digest, Signature<C>>,
